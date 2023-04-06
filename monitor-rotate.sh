@@ -8,9 +8,14 @@ if [ -n "${DEBUG+set}" ]; then echo debug on; DEBUG=1; fi
 
 ### configuration
 # find your Touchscreen and Touchpad device with `xinput`
-TouchscreenDevice='ELAN Touchscreen'
-TouchpadDevice='SynPS/2 Synaptics TouchPad'
+TouchscreenDevice='ELAN9008:00 04F3:2E36'
+TouchpadDevice='ASUE140D:00 04F3:31B9 Touchpad'
 KeyboardDevice='AT Translated Set 2 keyboard'
+
+# Virtual keyboard cmd command here. Suggestions:
+# Cinnamon: "dbus-send --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon.ToggleKeyboard"
+# Onboard (dependency, install first): onboard
+VirtualKeyboard='dbus-send --print-reply --dest=org.Cinnamon /org/Cinnamon org.Cinnamon.ToggleKeyboard'
 
 ### arguments
 if [ "$1" == '-nosd' ]; then NOSD="true" ; fi
@@ -35,7 +40,7 @@ rotatescreen() {
   inverted='-1 0 1 0 -1 1 0 0 1'
   inverted_float='-1.000000,0.000000,1.000000,0.000000,-1.000000,1.000000,0.000000,0.000000,1.000000'
 
-  # 90° to the left 
+  # 90° to the left
   # ⎡ 0 -1 1 ⎤
   # ⎜ 1  0 0 ⎥
   # ⎣ 0  0 1 ⎦
@@ -54,9 +59,9 @@ rotatescreen() {
     xinput set-prop "$TouchscreenDevice" 'Coordinate Transformation Matrix' $inverted
     xinput disable "$TouchpadDevice"
     xinput disable "$KeyboardDevice"
-    # if onboard isn't running and NOSD != true, start it
+    # if VirtualKeyboard isn't running and NOSD != true, start it
     if [[ "$NOSD" != "true" ]]; then
-        [[ `pgrep onboard` ]] || onboard 2>/dev/null &
+        [[ `pgrep $VirtualKeyboard` ]] || $VirtualKeyboard 2>/dev/null &
     fi
   elif [ "$1" == "-l" ]; then
     echo "90° to the left"
@@ -65,7 +70,7 @@ rotatescreen() {
     xinput disable "$TouchpadDevice"
     xinput disable "$KeyboardDevice"
     if [[ "$NOSD" != "true" ]]; then
-        [[ `pgrep onboard` ]] || onboard 2>/dev/null &
+        [[ `pgrep $VirtualKeyboard` ]] || $VirtualKeyboard 2>/dev/null &
     fi
   elif [ "$1" == "-r" ]; then
     echo "90° right up"
@@ -74,7 +79,7 @@ rotatescreen() {
     xinput disable "$TouchpadDevice"
     xinput disable "$KeyboardDevice"
     if [[ "$NOSD" != "true" ]]; then
-        [[ `pgrep onboard` ]] || onboard 2>/dev/null &
+        [[ `pgrep $VirtualKeyboard` ]] || $VirtualKeyboard 2>/dev/null &
     fi
   elif [ "$1" == "-n" ]; then
     echo "Back to normal"
@@ -82,7 +87,7 @@ rotatescreen() {
     xinput set-prop "$TouchscreenDevice" 'Coordinate Transformation Matrix' $normal
     xinput enable "$TouchpadDevice"
     xinput enable "$KeyboardDevice"
-    killall -q onboard
+    killall -q $VirtualKeyboard
   fi
 }
 
@@ -90,7 +95,7 @@ rotatescreen() {
 ( command -v monitor-sensor >/dev/null 2>&1 ) || { echo >&2 "$0 requires monitor-sensor but it's not installed.  Please install iio-sensor-proxy (https://github.com/hadess/iio-sensor-proxy)."; exit 1; }
 ( command -v xrandr >/dev/null 2>&1 ) || { echo >&2 "$0 requires xrandr but it's not installed. Aborting."; exit 1; }
 # transparently disable onboard support if it's not installed
-( command -v onboard >/dev/null 2>&1 ) || { echo >&2 "Not using onboard keyboard"; NOSD="true"; }
+( command -v $VirtualKeyboard >/dev/null 2>&1 ) || { echo >&2 "Not using Virtual keyboard"; NOSD="true"; }
 
 ### main script
 

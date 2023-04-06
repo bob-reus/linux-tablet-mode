@@ -1,5 +1,8 @@
 # linux-tablet-mode
-===
+
+
+Forked to support other virtual keyboards
+Original repo: https://github.com/scresante/linux-tablet-mode
 
 *INSTALLATION*
 
